@@ -4,6 +4,8 @@ import { RouterProvider,createBrowserRouter } from 'react-router-dom';
 import ShowSubject from './subject/ShowSubject';
 import './Subject.css';
 import SubjectError from './SubjectError';
+// Marko Andric
+// https://github.com/MarkoAndric22/Es_dnevik
 const router = createBrowserRouter([
 {
   
