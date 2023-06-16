@@ -1,72 +1,70 @@
 import { useState, useEffect } from "react";
-import SubjectDetails from "./SubjectDetails";
+import { Button, Stack, TextField, Typography } from "@mui/material";
+import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
+import { validateName, validateFond } from "../validacija";
 
-const Subject = () => {
-  const [data, setData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSubjectId, setSelectedSubjectId] = useState(null);
+const ShowSubject = () => {
+  const subject = useLoaderData();
+  const [name, setName] = useState("");
+  const [fond, setFond] = useState("");
+  const [errors, setErrors] = useState({});
+  const fetcher = useFetcher();
+  const nav = useNavigate();
 
   useEffect(() => {
-    let ignore = false;
-    const fetchData = async () => {
-      let response = await fetch('http://localhost:8080/es_dnevnik/subject');
-      let result = await response.json();
-      const dataWithTeachers = await Promise.all(result.map(async (subject) => {
-        let teacherResponse = await fetch(`http://localhost:8080/es_dnevnik/teacher/by-subject/${subject.id}`);
-        let teachers = await teacherResponse.json();
-        return {...subject, teachers};
-      }));
-      if (!ignore) {
-        setData(dataWithTeachers);
-      }
-    };
-    fetchData();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+      setName(subject.name || "");
+      setFond(subject.fond || "");
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  }, [subject]);
 
-  const filteredSubjects = data.filter((subject) =>
-    subject.name.toLowerCase().includes(searchTerm.toLowerCase()) 
-  );
+ 
+  useEffect(() => {
+    if(fetcher.data){
+        nav('/subjects');
+    }
+}, [fetcher, nav]);
+
+const handleValidation = () => {
+  const nameValidation = validateName(name);
+  const fondValidation = validateFond(fond);
+
+  setErrors({
+    name: !nameValidation.valid ? nameValidation.cause : "",
+    fond: !fondValidation.valid ? fondValidation.cause : ""
+  });
 
   return (
-    <>
-      <div className="center-container">
-        <div className="search-bar">
-          <input type="text" placeholder="Search..." value={searchTerm} onChange={handleSearch}/>
-        </div>
-
-        <div className="subject-container">
-          {filteredSubjects.map((item) => (
-            <div key={item.id} className="subject">
-              <h2>{item.name}</h2>
-              <h4>Fond: {item.fond} casova</h4>
-              
-              <div className="teacher-container">
-                <h4>Profesori:</h4>
-                <div>
-                  {item.teachers.map((teacher) => (
-                    <li key={teacher.id}>
-                      {teacher.first_name} {teacher.last_name}
-                    </li>
-                  ))}
-                </div>
-              </div>
-              <a onClick={() => setSelectedSubjectId(item.id)}>Prikazi</a>
-            </div>
-          ))}
-        </div>
-
-        {selectedSubjectId && <SubjectDetails subjectId={selectedSubjectId} />}
-      </div>
-    </>
+    nameValidation.valid &&
+    fondValidation.valid
   );
 };
 
-export default Subject;
+  const handleSave =  async () => {
+    if (handleValidation()) {
+      const updatedData = {
+        name: name,
+        fond: fond
+      };
 
+      fetcher.submit(updatedData, {
+        method: 'put',
+        action: `/subjects/${subject.id}`
+      });
+    }
+  };
+  
+  return (
+    <Stack direction={"column"} spacing={1} sx={{ paddingLeft: '160px', paddingRight: '160px', paddingTop: '40px' }}>
+      <Typography>Id: {subject.id}</Typography>
+      <TextField label="Name" value={name} onChange={e => setName(e.target.value)} error={!!errors.name} helperText={errors.name}/>
+      <TextField label="Fond" value={fond} onChange={e => setFond(e.target.value)} error={!!errors.fond} helperText={errors.fond}/>
+      <Stack direction={"row-reverse"}>
+      <Button variant="contained" onClick={handleSave}>
+          Save
+        </Button>
+      </Stack>
+    </Stack>
+  );
+};
+
+export default ShowSubject;
