@@ -121,7 +121,7 @@ const Subject = () => {
                         <Edit />
                       </IconButton>}
                       <IconButton onClick={() => {
-                        nav(`/subjectsDetails/${subject.id}`)
+                        nav(`/subjectsDetails/${subject.id}`);
                         
                       }}>
                         <InfoOutlined  />

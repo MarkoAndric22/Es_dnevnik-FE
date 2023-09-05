@@ -8,6 +8,7 @@ const NewSubject = () => {
     const [fond, setFond] = useState("");
     const fetcher = useFetcher();
     const nav = useNavigate();
+    const navigate = useNavigate();
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
@@ -50,6 +51,7 @@ const NewSubject = () => {
 
     return (
         <Container maxWidth="sm">
+            <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
             <Stack direction={"column"} spacing={1} sx={{ paddingTop: '40px'}}>
                 <TextField
                 label="Name" 

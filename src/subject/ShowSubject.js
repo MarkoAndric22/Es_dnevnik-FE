@@ -10,6 +10,7 @@ const ShowSubject = () => {
   const [errors, setErrors] = useState({});
   const fetcher = useFetcher();
   const nav = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
       setName(subject.name || "");
@@ -55,6 +56,7 @@ const handleValidation = () => {
   
   return (
     <Stack direction={"column"} spacing={1} sx={{ paddingLeft: '160px', paddingRight: '160px', paddingTop: '40px' }}>
+      <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
       <Typography>Id: {subject.id}</Typography>
       <TextField label="Name" value={name} onChange={e => setName(e.target.value)} error={!!errors.name} helperText={errors.name}/>
       <TextField label="Fond" value={fond} onChange={e => setFond(e.target.value)} error={!!errors.fond} helperText={errors.fond}/>

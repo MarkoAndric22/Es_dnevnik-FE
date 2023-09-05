@@ -1,9 +1,11 @@
+import { Card, CardContent, Grid, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useFetcher, useNavigate } from "react-router-dom";
-import { Button, Container, Stack, TextField } from "@mui/material";
+import { Button} from "@mui/material";
 import { validateUsername, validateFirstName, validateLastName, validatePassword, validateEmail, validateRepeatedPassword} from "../validacija";
 
-const NewTeacher = () => {
+const NewStudent = () =>{
+
     const [username, setUsername] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -14,7 +16,7 @@ const NewTeacher = () => {
   
     const fetcher = useFetcher();
     const nav = useNavigate();
-    const navigate=useNavigate();
+    const navigate= useNavigate();
   
     useEffect(() => {
       if (fetcher.data) {
@@ -59,73 +61,82 @@ const NewTeacher = () => {
           lastName: lastName,
           password: password,
           repeatedPassword: repeatedPassword,
-          role_name: "ROLE_TEACHER",
+          role_name: "ROLE_STUDENT",
           email: email,
         };
         console.log(formData)
         fetcher.submit(formData, {
           method: "post",
-          action: `/teachers/new`,
+          action: `/student/new`,
         });
       }
     };
-  
-    return (
-      <Container maxWidth="sm">
+return(
+
+    <Card style={{maxWidth:450, margin:"0 auto",padding:"20px 5px"}}>
+        <CardContent>
         <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
-        <Stack direction={"column"} spacing={1} sx={{ paddingTop: "40px" }}>
-          <TextField
-            label="Username"
-            value={username}
+            <Typography gutterBottom variant="h5">Create student</Typography>
+            <form>
+            <Grid container spacing={1}>
+            <Grid xs={12} sm={6} item>
+                    <TextField label="Username" 
+                    value={username}
             onChange={(e) => setUsername(e.target.value)}
             error={!!errors.username}
             helperText={errors.username}
-          />
-          <TextField
-            label="First Name"
-            value={firstName}
+                    placeholder="Enter username" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                    <TextField label="First name" 
+                    value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             error={!!errors.firstName}
             helperText={errors.firstName}
-          />
-          <TextField
-            label="Last Name"
-            value={lastName}
+                    placeholder="Enter first name" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                    <TextField label="Last name"
+                     value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            error={!!errors.lastName}
-            helperText={errors.lastName}
-          />
-          <TextField
-            label="Password"
+            error={!!errors.last_Name}
+            helperText={errors.last_Name}
+                    placeholder="Enter last name" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                    <TextField type="password" label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            type="password"
             error={!!errors.password}
             helperText={errors.password}
-          />
-          <TextField
-            label="Repeat Password"
-            value={repeatedPassword}
+                    placeholder="Enter password" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                    <TextField label="Repeat password" 
+                     value={repeatedPassword}
             onChange={(e) => setRepeatedPassword(e.target.value)}
             type="password"
             error={!!errors.repeatedPassword}
             helperText={errors.repeatedPassword}
-          />
-          <TextField
-            label="Email"
-            value={email}
+                    placeholder="Enter repeat password" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} item>
+                    <TextField type="email" label="Email"
+                     value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={!!errors.email}
             helperText={errors.email}
-          />
-          <Stack direction={"row-reverse"}>
-            <Button variant="contained" onClick={handleSubmit}>
-              Add
-            </Button>
-          </Stack>
-        </Stack>
-      </Container>
-    );
-  };
-  
-  export default NewTeacher;
+                    placeholder="Enter email" variant="outlined" fullWidth required/>
+                </Grid>
+                <Grid xs={12} item>
+                    <Button type="sumbit" variant="contained" color="primary"
+                    fullWidth onClick={handleSubmit}>submit</Button>
+                </Grid>
+            </Grid>
+            </form>
+        </CardContent>
+    </Card>
+)
+
+}
+export default NewStudent;

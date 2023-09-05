@@ -6,6 +6,14 @@ import ShowTeacher from './teacher/ShowTeacher';
 import ShowTeacheres from './teacher/ShowTeacheres';
 import NewTeacher from './teacher/NewTeacher';
 import TeacherDetails from './teacher/TeacherDetails';
+import ShowStudents from './student/ShowStudents';
+import ShowStudent from './student/ShowStudent';
+import NewStudent from './student/NewStudent';
+import StudentDetails from './student/StudentDetails';
+import NewParent from './parent/NewParent';
+import ShowParent from './parent/ShowParent';
+import ShowParents from './parent/ShowParents';
+import ParentDetails from './parent/ParentDetails';
 
 import './Subject.css';
 import App from './App';
@@ -15,6 +23,10 @@ import { Box, Container, Icon, Stack, Typography } from '@mui/material';
 import { Error } from '@mui/icons-material';
 import SubjectDetails from './subject/SubjectDetails';
 import NewSubject from './subject/NewSubject';
+const rootElement = document.getElementById('root');
+
+// Marko Andric
+// putanja na gitu: https://github.com/MarkoAndric22/Es_dnevik
 
 const ErrorDisplay = ({ entity }) => {
   const error = useRouteError();
@@ -61,21 +73,14 @@ const router = createBrowserRouter([
         loader: async () => {
           const user = get_login();
           let url;
-          let url2;
           if(user.role.name === "ROLE_ADMIN"){
             url = 'http://localhost:8080/es_dnevnik/subject';
           }else if(user.role.name === "ROLE_TEACHER"){
             const teacherId = user.id;
             url = `http://localhost:8080/es_dnevnik/subject/by-teacher/${teacherId}`;
-            url2 = `http://localhost:8080/es_dnevnik/subject/teacherDontHave/${teacherId}`;
           }
           const response = await fetch(url);
           const data = response.json();
-
-          if (url2) {
-            const response2 = await fetch(url2);
-            const data2 = await response2.json();
-          }
           return data;
         },
       },
@@ -260,16 +265,238 @@ const router = createBrowserRouter([
         element: <TeacherDetails />,
         errorElement: <ErrorDisplay entity="nastavnik" />,
         loader: async ({ params }) => {
-        const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_TEACHER'}]);
-        const [teacher_response, subject_response] = await Promise.all([
-        fetch(`http://localhost:8080/es_dnevnik/teacher/${params.id}`),
-        fetch(`http://localhost:8080/es_dnevnik/subject/by-teacher/${params.id}`)
-      ]);
-      const teacher = await teacher_response.json();
-      const subjects = await subject_response.json();
-      return [teacher, subjects];
+          const user = check_login([{ name: 'ROLE_ADMIN' }, { name: 'ROLE_TEACHER' }]);
+          const [teacher_response, subject_response,response_subjects] = await Promise.all([
+            fetch(`http://localhost:8080/es_dnevnik/teacher/${params.id}`),
+            fetch(`http://localhost:8080/es_dnevnik/subject/by-teacher/${params.id}`),
+            fetch(`http://localhost:8080/es_dnevnik/subject`),
+          ]);
+          const teacher = await teacher_response.json();
+          const subjects = await subject_response.json();
+          const allSubjects= await response_subjects.json();
+          return [teacher, subjects,allSubjects];
         },
-      }
+        action: async ({ params, request }) => {
+          const user = check_login([{ name: 'ROLE_ADMIN' }]);
+          if (request.method === 'POST') {
+            const formData = await request.formData();
+            const subject =  formData.get('subjectId');
+            const teacher = params.id;
+            return fetch(`http://localhost:8080/es_dnevnik/subject/addSubjectTeacher?teacherId=${teacher}&subjectId=${subject}`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+             
+            });
+          }
+        }
+      },
+      
+      {
+        path: "students",
+        element: <ShowStudents/>,
+        errorElement: <ErrorDisplay entity="ucenik" />,
+        loader: async () => {
+          
+          const user = get_login();
+          const response = await fetch('http://localhost:8080/es_dnevnik/student', {
+            method: 'GET',
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': JSON.parse(localStorage.getItem('user')).token
+            }
+          });
+          return response.json();
+        },
+      },
+      {
+        path: "student/:id",
+        element: <ShowStudent />,
+        errorElement: <ErrorDisplay entity="ucenik" />,
+        loader: async ({ params }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          const response = await fetch(`http://localhost:8080/es_dnevnik/student/${params.id}`);
+          return response.json();
+        },
+        action: async ({ params, request }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          if (request.method === 'DELETE') {
+            return fetch(`http://localhost:8080/es_dnevnik/student/${params.id}`, {
+              method: 'DELETE',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              }
+            });
+          } else if (request.method === 'PUT') {
+            const data = Object.fromEntries(await request.formData());
+            return fetch(`http://localhost:8080/es_dnevnik/student/${params.id}`, {
+              method: 'PUT',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+              body: JSON.stringify(data)
+            });
+          }
+          
+        }
+      },
+      {
+        path: "student/new",
+        element: <NewStudent />,
+        errorElement: <ErrorDisplay entity="ucenika" />,
+        loader: () => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          return user;
+        },
+        action: async ({ request }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          if (request.method === 'POST') {
+            const data = Object.fromEntries(await request.formData());
+            return fetch(`http://localhost:8080/es_dnevnik/student`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+              body: JSON.stringify(data)
+            });
+          }
+        }
+        
+      },
+     
+      {
+        path: "studentDetails/:id",
+        element: <StudentDetails />,
+        errorElement: <ErrorDisplay entity="student" />,
+        loader: async ({ params }) => {
+        const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_STUDENT'}]);
+        const [response_student,student_response, mark_response,subject_response] = await Promise.all([
+          fetch(`http://localhost:8080/es_dnevnik/student/${params.id}`),
+          fetch(`http://localhost:8080/es_dnevnik/subject/subjectForStudent/${params.id}`),
+          fetch(`http://localhost:8080/es_dnevnik/mark/studentMarks/${params.id}`),
+          fetch(`http://localhost:8080/es_dnevnik/subject`),
+        ]);
+        const studentId= await response_student.json();
+        const student= await student_response.json();
+        const mark= await mark_response.json();
+
+        const allSubjects= await subject_response.json();
+       
+        return [studentId,student, mark, allSubjects]
+        },
+        action: async ({ params, request }) => {
+          const user = check_login([{ name: 'ROLE_ADMIN' }]);
+          if (request.method === 'POST') {
+            const formData = await request.formData();
+            const subject =  formData.get('subjectId');
+            const student = params.id;
+            return fetch(`http://localhost:8080/es_dnevnik/subject/addSubjectStudent?studentId=${student}&subjectId=${subject}`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+             
+            });
+          }
+        }
+      },
+      {
+        path: "parents",
+        element: <ShowParents/>,
+        errorElement: <ErrorDisplay entity="roditelj" />,
+        loader: async () => {
+          
+          const user = get_login();
+          const response = await fetch('http://localhost:8080/es_dnevnik/parent', {
+            method: 'GET',
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization': JSON.parse(localStorage.getItem('user')).token
+            }
+          });
+          return response.json();
+        },
+      },
+      {
+        path: "parent/new",
+        element: <NewParent />,
+        errorElement: <ErrorDisplay entity="roditelj" />,
+        loader: () => {
+          const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_PARENT'}]);
+          return user;
+        },
+        action: async ({ request }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          if (request.method === 'POST') {
+            // const data = Object.fromEntries(await request.formData());
+            const formData = await request.formData();
+    const students = JSON.parse([...formData.getAll('students')]); 
+    const data = Object.fromEntries(formData);
+    data.students = students;
+            return fetch(`http://localhost:8080/es_dnevnik/parent`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+              
+              body: JSON.stringify(data)
+            });
+          }
+        }
+      },
+      {
+        path: "parent/:id",
+        element: <ShowParent />,
+        errorElement: <ErrorDisplay entity="roditelj" />,
+        loader: async ({ params }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          const response = await fetch(`http://localhost:8080/es_dnevnik/parent/${params.id}`);
+          return response.json();
+        },
+        action: async ({ params, request }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'}]);
+          if (request.method === 'DELETE') {
+            return fetch(`http://localhost:8080/es_dnevnik/parent/${params.id}`, {
+              method: 'DELETE',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              }
+            });
+          } else if (request.method === 'PUT') {
+            const data = Object.fromEntries(await request.formData());
+            return fetch(`http://localhost:8080/es_dnevnik/parent/${params.id}`, {
+              method: 'PUT',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+              body: JSON.stringify(data)
+            });
+          }
+          
+        }
+      },
+      
+      {
+        path: "parentDetails/:id",
+        element: <ParentDetails />,
+        errorElement: <ErrorDisplay entity="roditelj" />,
+        loader: async ({ params }) => {
+        const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_PARENT'}]);
+        const response = await fetch(`http://localhost:8080/es_dnevnik/parent/getMarks/${params.id}`
+      );
+      return response.json();
+        },
+      },
+      
     ]
   }
 ]);

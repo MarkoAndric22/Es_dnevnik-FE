@@ -1,14 +1,16 @@
-import { Card, CardContent, Typography, List, ListItem } from "@mui/material";
-import { useLoaderData } from "react-router-dom";
+import { Card, CardContent, Typography, List, ListItem ,Button} from "@mui/material";
+import { useLoaderData,useNavigate } from "react-router-dom";
 
 const SubjectDetails = () => {
   const data = useLoaderData();
   const subject = data[0];
   const teachers = data[1];
+  const navigate = useNavigate();
  
 return (
   <>
  <Card sx={{display: 'flex', flexDirection:'column', justifyContent: 'space-between', marginLeft:'120px', marginRight:'120px'}}>
+ <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
       <CardContent>
       <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
       Id: {subject.id}

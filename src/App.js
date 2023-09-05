@@ -1,10 +1,13 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet,useNavigate} from "react-router-dom";
 import { AppBar, Box, Divider, Drawer, IconButton, Stack, Toolbar, Typography, Button, createTheme, ThemeProvider, CssBaseline, FormGroup, FormControlLabel, Switch} from "@mui/material";
 import { ChevronLeft, Menu } from "@mui/icons-material";
-import { createContext, useMemo, useState } from "react";
+import { createContext, useMemo, useState,useEffect} from "react";
 import { prvo_veliko } from "./teacher/tekstAlati";
 import { useLogin } from "./login_logic";
 import LoginControl from "./LoginControl";
+import jwt_decode from "jwt-decode";
+
+
 
 const create_palette = (mode) => {
   let r = {};
@@ -45,6 +48,34 @@ function App() {
   const [mode, setMode] = useState('light');
   const theme = useMemo(() => createTheme(create_palette(mode)), [mode]);
   const [user, login, logout] = useLogin();
+  const navigate = useNavigate();
+  // useEffect(() => {
+  //   const checkTokenExpiration = () => {
+  //     const token = localStorage.getItem("user").token;
+  
+  //     if (token) {
+  //       try {
+  //         const decodedToken = jwt_decode(token);
+  //         console.log("Decoded token:", decodedToken);
+  //         const currentTime = Math.floor(Date.now() / 1000);
+  //         if (decodedToken.exp < currentTime) {
+  //           logout();
+  //           navigate("/login");
+  //         }
+  //       } catch (error) {
+  //         console.error("Error decoding token:", error);
+  //       }
+  //     }
+  //   };
+  
+  //   const interval = setInterval(checkTokenExpiration, 60000);
+  
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, [navigate]);
+  
+
 
   return <>
     <ThemeProvider theme={theme}>
@@ -96,6 +127,8 @@ function App() {
           <Stack direction="column" spacing={1}>
             <Button component={NavLink} to={'subjects'}>predmet</Button>
             <Button component={NavLink} to={'teachers'}>nastavnik</Button>
+            <Button component={NavLink} to={'students'}>student</Button>
+            <Button component={NavLink} to={'parents'}>roditelji</Button>
           </Stack>
         </Drawer>
         <Box sx={{ paddingTop: "60px" }}>
