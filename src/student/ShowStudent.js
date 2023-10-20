@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Stack, TextField, Typography } from "@mui/material";
+import { Button, Stack, TextField, Typography,MenuItem,Select } from "@mui/material";
 import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
 import {
   validateFirstName,
@@ -17,6 +17,8 @@ const ShowStudent = () => {
   const [password, setPassword] = useState("");
   const [repeatedPassword, setRepeatedPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [classs, setClasss]= useState([]);
+  const [selectedClass, setSelectedClass]= useState(student.classes.name || "");
   const [errors, setErrors] = useState({});
   const fetcher = useFetcher();
   const nav = useNavigate();
@@ -86,7 +88,8 @@ useEffect(() => {
         password: password,
         repeatedPassword: repeatedPassword,
         role_name: "ROLE_PARENT",
-        email: email
+        email: email,
+        classs: selectedClass,
       };
 
       fetcher.submit(updatedData, {
@@ -96,7 +99,26 @@ useEffect(() => {
       });
   }
   };
+  useEffect(() => {
+    const fetchClass = async () => {
+      try {
 
+     
+          const response = await fetch(`http://localhost:8080/es_dnevnik/class`);
+          
+          if (!response.ok) {
+              throw new Error("Class data not available");
+          }
+          const data = await response.json();
+          setClasss(data);
+        
+      } catch (error) {
+        console.error("Error fetching class:", error);
+      } 
+    };
+
+    fetchClass();
+}, []);
   return (
     <Stack direction={"column"} spacing={1} sx={{ paddingLeft: '160px', paddingRight: '160px', paddingTop: '40px' }}>
         <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
@@ -132,7 +154,28 @@ useEffect(() => {
         error={!!errors.repeatedPassword}
         helperText={errors.repeatedPassword}
       />
-      <TextField label="Email" value={email} disabled />
+      <TextField label="Email" 
+      value={email} disabled
+       />
+       
+       <Select
+        label="Choose class"
+        variant="outlined"
+        fullWidth
+        value={selectedClass}
+        onChange={(e) => setSelectedClass(e.target.value)
+        }
+      >
+        <MenuItem value="">
+        </MenuItem>
+        {classs.map((classItem) => (
+          <MenuItem key={classItem.id} value={classItem.name}>
+            {classItem.name}
+          </MenuItem>
+        ))}
+      </Select>
+
+      
       <Stack direction={"row-reverse"}>
         <Button variant="contained" onClick={handleSave}>
           Save

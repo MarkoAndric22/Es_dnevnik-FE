@@ -16,21 +16,7 @@ const StudentDetails = () => {
   const [student,setStudent]=useState(null);
   const [subjectss, setSubjectss] = useState([]);
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/es_dnevnik/student/${id}`);
-        const data = await response.json();
-        setStudent(data);
-      } catch (error) {
-        console.error("Error fetching student:", error);
-      }
-    };
-
-    fetchStudent();
-  }, [id]);
-
-  if (!student) {
+  if (!studentId) {
     return <p>Loading...</p>;
   }
 
@@ -56,12 +42,12 @@ const handleSubmit = (e) => {
 const subjectIds = subjectss.map(subject => subject.id);
 for (const subjectId of subjectIds) {console.log(subjectId)
     const formData = {
-  studentId : student.id,
+  studentId : studentId.id,
   subjectId : subjectId
 };
 fetcher.submit(formData, {
   method: 'post',
-  action: `/studentDetails/${student.id}`, 
+  action: `/studentDetails/${studentId.id}`, 
 });
 
 }
@@ -71,10 +57,10 @@ fetcher.submit(formData, {
         <>
        <Card sx={{display: 'flex', flexDirection:'column', justifyContent: 'space-between', marginLeft:'120px', marginRight:'120px'}}>
        <Button variant="outlined" onClick={() => navigate(-1)}>Nazad</Button> {/* Dugme za povratak unazad */}
-            <CardContent key={student.id}>
+            <CardContent key={studentId.id}>
            
             <Typography variant="h4" component="div" sx={{color: 'green'}} >
-            {student.first_name} {student.last_name}
+            {studentId.first_name} {studentId.last_name}
             </Typography>
             <br />
             <Typography variant="h5">

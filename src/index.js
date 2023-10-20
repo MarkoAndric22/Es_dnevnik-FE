@@ -14,6 +14,7 @@ import NewParent from './parent/NewParent';
 import ShowParent from './parent/ShowParent';
 import ShowParents from './parent/ShowParents';
 import ParentDetails from './parent/ParentDetails';
+import Diary from './diary/Diary';
 
 import './Subject.css';
 import App from './App';
@@ -186,6 +187,29 @@ const router = createBrowserRouter([
       },
 
 
+      {
+        path: "diary/new",
+        element: <Diary/>,
+        errorElement: <ErrorDisplay entity="Diary" />,
+        loader: () => {
+          const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_TEACHER'}]);
+          return user;
+        },
+        action: async ({ request }) => {
+          const user = check_login([{name: 'ROLE_ADMIN'},{name: 'ROLE_TEACHER'}]);
+          if (request.method === 'POST') {
+            const data = Object.fromEntries(await request.formData());
+            return fetch(`http://localhost:8080/es_dnevnik/teacher/teacherEvaluatesStudent`, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/json",
+                'Authorization': JSON.parse(localStorage.getItem('user')).token
+              },
+              body: JSON.stringify(data)
+            });
+          }
+        }
+      },
 
       {
         path: "teachers",

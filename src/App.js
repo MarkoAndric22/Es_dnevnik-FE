@@ -129,6 +129,7 @@ function App() {
             <Button component={NavLink} to={'teachers'}>nastavnik</Button>
             <Button component={NavLink} to={'students'}>student</Button>
             <Button component={NavLink} to={'parents'}>roditelji</Button>
+            <Button component={NavLink} to={'diary/new'}>dnevnik</Button>
           </Stack>
         </Drawer>
         <Box sx={{ paddingTop: "60px" }}>

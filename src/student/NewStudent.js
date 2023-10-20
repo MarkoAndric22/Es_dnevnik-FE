@@ -1,4 +1,4 @@
-import { Card, CardContent, Grid, TextField, Typography } from "@mui/material";
+import { Card, CardContent, Grid, TextField, Typography, MenuItem, Select } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useFetcher, useNavigate } from "react-router-dom";
 import { Button} from "@mui/material";
@@ -13,6 +13,8 @@ const NewStudent = () =>{
     const [repeatedPassword, setRepeatedPassword] = useState("");
     const [email, setEmail] = useState("");
     const [errors, setErrors] = useState({});
+    const [classs, setClasss] = useState([]);
+    const [selectedClass, setSelectedClass] = useState('');
   
     const fetcher = useFetcher();
     const nav = useNavigate();
@@ -63,6 +65,7 @@ const NewStudent = () =>{
           repeatedPassword: repeatedPassword,
           role_name: "ROLE_STUDENT",
           email: email,
+          classs: selectedClass,
         };
         console.log(formData)
         fetcher.submit(formData, {
@@ -71,6 +74,28 @@ const NewStudent = () =>{
         });
       }
     };
+
+    useEffect(() => {
+      const fetchClass = async () => {
+        try {
+
+       
+            const response = await fetch(`http://localhost:8080/es_dnevnik/class`);
+            
+            if (!response.ok) {
+                throw new Error("Class data not available");
+            }
+            const data = await response.json();
+            setClasss(data);
+          
+        } catch (error) {
+          console.error("Error fetching class:", error);
+        } 
+      };
+  
+      fetchClass();
+  }, []);
+
 return(
 
     <Card style={{maxWidth:450, margin:"0 auto",padding:"20px 5px"}}>
@@ -128,6 +153,22 @@ return(
             helperText={errors.email}
                     placeholder="Enter email" variant="outlined" fullWidth required/>
                 </Grid>
+                <Select
+        label="Choose class"
+        variant="outlined"
+        fullWidth
+        value={selectedClass}
+        onChange={(e) => setSelectedClass(e.target.value)}
+      >
+        <MenuItem value="">
+          <em>class</em>
+        </MenuItem>
+        {classs.map((classItem) => (
+          <MenuItem key={classItem.name} value={classItem.name}>
+            {classItem.name}
+          </MenuItem>
+        ))}
+      </Select>
                 <Grid xs={12} item>
                     <Button type="sumbit" variant="contained" color="primary"
                     fullWidth onClick={handleSubmit}>submit</Button>
